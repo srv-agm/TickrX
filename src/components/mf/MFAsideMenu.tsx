@@ -56,6 +56,24 @@ const menu: MenuItem[] = [
         subMenu: [],
         route: "/TickrX/dashboard",
       },
+      {
+        title: "Summary",
+        icon: "",
+        subMenu: [],
+        route: "/TickrX/summary",
+      },
+      {
+        title: "Google",
+        icon: "",
+        subMenu: [],
+        route: "/TickrX/google",
+      },
+      {
+        title: "Meta",
+        icon: "",
+        subMenu: [],
+        route: "/TickrX/meta",
+      },
       // {
       //   title: "Campaign Optimisation",
       //   icon: "",
