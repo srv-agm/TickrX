@@ -18,8 +18,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Social Media Listening",
-  description: "Social Media Listening",
+  title: "TickrX",
+  description: "TickrX",
 };
 
 export const viewport: Viewport = {

@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 const SignUpPage = () => {
   return (
     <Home
-      InfoText="Social Media Listing"
+      InfoText="TickrX"
       logoSize="w-52"
       logoUrl="https://infringementportalcontent.mfilterit.com/images/media/logos/mfilterit-white-logo.png"
     >

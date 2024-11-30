@@ -47,14 +47,14 @@ const menu: MenuItem[] = [
   //   ],
   // },
   {
-    title: "Social Media Listening",
+    title: "TickrX",
     icon: <Globe size={18} />,
     subMenu: [
       {
-        title: "Keyword",
+        title: "Dashboard",
         icon: "",
         subMenu: [],
-        route: "/config/keyword",
+        route: "/TickrX/dashboard",
       },
       // {
       //   title: "Campaign Optimisation",
