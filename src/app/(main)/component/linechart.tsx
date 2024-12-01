@@ -12,17 +12,41 @@ const Chart = dynamic(() => import("react-apexcharts"), {
   height: number;
 }>;
 
-const CampaignAnalysis: React.FC = () => {
-  type GraphKey = "Impressions" | "Clicks";
+interface CampaignAnalysisProps {
+  clicksData: Array<{
+    clicks: number;
+    inserted_date: string;
+  }>;
+  impressionsData: Array<{
+    impressions: number;
+    inserted_date: string;
+  }>;
+}
 
+const CampaignAnalysis: React.FC<CampaignAnalysisProps> = ({ clicksData, impressionsData }) => {
+  type GraphKey = "Impressions" | "Clicks";
   const [activeTab, setActiveTab] = useState<GraphKey>("Impressions");
 
+  // Transform data into the required format
+  const formattedClicksData = clicksData.map(item => item.clicks);
+  const formattedImpressionsData = impressionsData.map(item => item.impressions);
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return `${date.getDate()} ${date.toLocaleString('default', { month: 'short' })}`;
+  };
+
+  const dates = activeTab === "Clicks" 
+    ? clicksData.map(item => formatDate(item.inserted_date))
+    : impressionsData.map(item => formatDate(item.inserted_date));
+
   const graphData: Record<GraphKey, number[]> = {
-    Impressions: [5, 7, 10, 6, 12, 15, 14, 10, 8, 6, 8, 5, 6, 11, 9, 7],
-    Clicks: [
-      1.8, 3.2, 7.0, 4.0, 7.1, 8.3, 8.7, 7.7, 5.4, 3.5, 4.7, 1.7, 4.0, 7.1, 5.4,
-      3.3,
-    ],
+    Impressions: formattedImpressionsData.length > 0 
+      ? formattedImpressionsData 
+      : [5, 7, 10, 6, 12, 15, 14, 10],
+    Clicks: formattedClicksData.length > 0 
+      ? formattedClicksData 
+      : [1.8, 3.2, 7.0, 4.0, 7.1, 8.3, 8.7],
   };
 
   const options: ApexOptions = {
@@ -31,23 +55,9 @@ const CampaignAnalysis: React.FC = () => {
       toolbar: { show: false },
     },
     xaxis: {
-      categories: [
-        "Apr-2023",
-        "May-2023",
-        "Jun-2023",
-        "Jul-2023",
-        "Aug-2023",
-        "Sep-2023",
-        "Oct-2023",
-        "Nov-2023",
-        "Dec-2023",
-        "Jan-2024",
-        "Feb-2024",
-        "Mar-2024",
-        "Apr-2024",
-        "May-2024",
-        "Jun-2024",
-        "Aug-2024",
+      categories: dates.length > 0 ? dates : [
+        "Apr-2023", "May-2023", "Jun-2023", "Jul-2023",
+        "Aug-2023", "Sep-2023", "Oct-2023", "Nov-2023",
       ],
     },
     stroke: {
@@ -60,6 +70,23 @@ const CampaignAnalysis: React.FC = () => {
       text: activeTab,
       align: "center",
     },
+    yaxis: {
+      labels: {
+        formatter: function(value) {
+          if (value >= 1000000) {
+            return `${(value/1000000).toFixed(1)}M`;
+          }
+          return value >= 1000 ? `${(value/1000).toFixed(1)}K` : value.toString();
+        }
+      }
+    },
+    tooltip: {
+      y: {
+        formatter: function(value) {
+          return value.toLocaleString();
+        }
+      }
+    }
   };
 
   const series = [
@@ -72,8 +99,8 @@ const CampaignAnalysis: React.FC = () => {
   return (
     <>
     {/* // <div className="rounded-lg bg-white p-4 shadow-md"> */}
-      <h2 className="mb-4 text-xl font-bold">Campaign Analysis</h2>
-      <div className="mb-4 flex space-x-2">
+      <h2 className="mb-2 text-xl font-bold">Campaign Analysis</h2>
+      <div className="mb-2 flex space-x-2">
         {(Object.keys(graphData) as GraphKey[]).map((tab) => (
           <button
             key={tab}

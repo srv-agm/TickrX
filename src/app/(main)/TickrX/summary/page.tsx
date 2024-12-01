@@ -15,38 +15,36 @@ const Card: React.FC<CardProps> = ({ title, value }) => {
   );
 };
 
-const BarGraph: React.FC = () => {
-  const data = [
-    { label: "Aspect Ratio", percentage: 74 },
-    { label: "Brand Early", percentage: 95 },
-    { label: "Safe Zones", percentage: 72 },
-    { label: "Sound On", percentage: 95 },
-    { label: "Supers Present", percentage: 65 },
-    { label: "Video Length", percentage: 76 },
-  ];
+interface BarGraphProps {
+  data: Array<{
+    Question_Heading: string;
+    complaince_percentage: number;
+  }>;
+}
 
+const BarGraph: React.FC<BarGraphProps> = ({ data = [] }) => {
   return (
-    // <div className="rounded-lg bg-white p-4 shadow-md">
     <>
       <h3 className="mb-4 text-lg font-bold">
-        Adoption Rate by Creative Guideline
+        Adoption Rate by Creative
       </h3>
       <div>
         {data.map((item, index) => (
           <div key={index} className="mb-3 flex items-center">
-            <span className="w-1/3 text-sm text-gray-600">{item.label}</span>
+            <span className="w-1/3 text-sm text-gray-600">
+              {item.Question_Heading}
+            </span>
             <div className="relative h-4 w-2/3 rounded-full bg-gray-200">
               <div
                 className="h-4 rounded-full bg-teal-500"
-                style={{ width: `${item.percentage}%` }}
+                style={{ width: `${item.complaince_percentage}%` }}
               ></div>
             </div>
             <span className="ml-3 text-sm text-gray-600">
-              {item.percentage}%
+              {item.complaince_percentage}%
             </span>
           </div>
         ))}
-        {/* </div> */}
       </div>
     </>
   );
@@ -74,6 +72,34 @@ const formatLargeNumber = (value: string): string => {
   }
 };
 
+// Add interfaces for both API responses
+interface ClicksApiResponse {
+  data: Array<{
+    clicks: number;
+    inserted_date: string;
+  }>;
+  message: string;
+}
+
+interface ImpressionsApiResponse {
+  data: Array<{
+    impressions: number;
+    inserted_date: string;
+  }>;
+  message: string;
+}
+
+// Add interface for adoption rate API response
+interface AdoptionRateItem {
+  Question_Heading: string;
+  complaince_percentage: number;
+}
+
+interface AdoptionRateResponse {
+  data: AdoptionRateItem[];
+  message: string;
+}
+
 const CardWithGraph: React.FC = () => {
   const [cardData, setCardData] = React.useState<SummaryApiItem[]>([
     { title: "Creative Quality Score", value: "0%" },
@@ -85,6 +111,9 @@ const CardWithGraph: React.FC = () => {
   const [tableData, setTableData] = React.useState<any[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [clicksData, setClicksData] = React.useState<ClicksApiResponse['data']>([]);
+  const [impressionsData, setImpressionsData] = React.useState<ImpressionsApiResponse['data']>([]);
+  const [adoptionRateData, setAdoptionRateData] = useState<AdoptionRateItem[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -92,45 +121,52 @@ const CardWithGraph: React.FC = () => {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(
-          "https://ticker_plus.mfilterit.net/Summary",
-          {
+        // Fetch all APIs in parallel
+        const [summaryResponse, clicksResponse, impressionsResponse, adoptionResponse] = await Promise.all([
+          fetch("https://ticker_plus.mfilterit.net/Summary", {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
+            headers: { "Content-Type": "application/json" },
+          }),
+          fetch("https://ticker_plus.mfilterit.net/overall_clicks_graph", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }),
+          fetch("https://ticker_plus.mfilterit.net/overall_impressions_graph", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }),
+          fetch("https://ticker_plus.mfilterit.net/adoption_rate_summary", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          })
+        ]);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!summaryResponse.ok || !clicksResponse.ok || !impressionsResponse.ok || !adoptionResponse.ok) {
+          throw new Error(`HTTP error!`);
         }
 
-        const data: SummaryApiItem[] = await response.json();
+        const [summaryData, clicksResponseData, impressionsResponseData, adoptionResponseData] = await Promise.all([
+          summaryResponse.json(),
+          clicksResponse.json() as Promise<ClicksApiResponse>,
+          impressionsResponse.json() as Promise<ImpressionsApiResponse>,
+          adoptionResponse.json() as Promise<AdoptionRateResponse>
+        ]);
 
-        if (!Array.isArray(data)) {
-          throw new Error("Invalid data format received from API");
-        }
-
-        // Format the data
-        const formattedData = data.map((item) => {
+        const formattedData = summaryData.map((item: SummaryApiItem) => {
           if (item.title === "Impressions" || item.title === "Clicks") {
-            return {
-              ...item,
-              value: formatLargeNumber(item.value),
-            };
+            return { ...item, value: formatLargeNumber(item.value) };
           }
           return item;
         });
 
         setCardData(formattedData);
+        setClicksData(clicksResponseData.data);
+        setImpressionsData(impressionsResponseData.data);
+        setAdoptionRateData(adoptionResponseData.data);
+
       } catch (error) {
         console.error("Error fetching data:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while fetching data",
-        );
+        setError(error instanceof Error ? error.message : "An error occurred while fetching data");
         setCardData([
           { title: "Creative Quality Score", value: "0%" },
           { title: "Impressions", value: "0" },
@@ -160,49 +196,15 @@ const CardWithGraph: React.FC = () => {
           <Card key={index} title={card.title} value={card.value} />
         ))}
       </div>
-      <div className="mb-4 w-full rounded-lg bg-white p-4 shadow-md">
-        <div className="max-h-[400px] overflow-y-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="p-2 text-left text-sm font-semibold text-gray-600">
-                  Creative ID
-                </th>
-                <th className="p-2 text-left text-sm font-semibold text-gray-600">
-                  Impressions
-                </th>
-                <th className="p-2 text-left text-sm font-semibold text-gray-600">
-                  Clicks
-                </th>
-                <th className="p-2 text-left text-sm font-semibold text-gray-600">
-                  CTR
-                </th>
-                <th className="p-2 text-left text-sm font-semibold text-gray-600">
-                  Compliance Score
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tableData.map((row, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-2 text-sm">{row.creativeId}</td>
-                  <td className="p-2 text-sm">{row.impressions}</td>
-                  <td className="p-2 text-sm">{row.clicks}</td>
-                  <td className="p-2 text-sm">{row.ctr}</td>
-                  <td className="p-2 text-sm">{row.complianceScore}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <div className="flex gap-4">
         <div className="h-[400px] flex-1 rounded-lg bg-white p-4 shadow-md">
-          <CampaignAnalysis />
+          <CampaignAnalysis 
+            clicksData={clicksData} 
+            impressionsData={impressionsData}
+          />
         </div>
         <div className="h-[400px] flex-1 rounded-lg bg-white p-4 shadow-md">
-          <BarGraph />
+          <BarGraph data={adoptionRateData} />
         </div>
       </div>
     </div>
