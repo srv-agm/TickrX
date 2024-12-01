@@ -28,7 +28,7 @@ const LoginFormCardContainer = () => {
     // Normal login
     else if (res.data?.auth_response?.AuthenticationResult?.AccessToken) {
       //   TODO: Fetch menu redirect route
-      router.push("/TickrX/dashboard");
+      router.push("/TickrX/summary");
       sessionStorage.setItem(
         "AccessToken",
         res.data?.auth_response?.AuthenticationResult?.AccessToken,
@@ -42,7 +42,7 @@ const LoginFormCardContainer = () => {
     const AccessToken =
       d?.data?.auth_response?.AuthenticationResult?.AccessToken;
     if (AccessToken) {
-      router.push("/TickrX/dashboard");
+      router.push("/TickrX/summary");
       sessionStorage.setItem("AccessToken", AccessToken);
       sessionStorage.removeItem("username");
     }

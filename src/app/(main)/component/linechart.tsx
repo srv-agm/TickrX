@@ -13,7 +13,7 @@ const Chart = dynamic(() => import("react-apexcharts"), {
 }>;
 
 const CampaignAnalysis: React.FC = () => {
-  type GraphKey = "Impressions" | "Clicks" | "Visits";
+  type GraphKey = "Impressions" | "Clicks";
 
   const [activeTab, setActiveTab] = useState<GraphKey>("Impressions");
 
@@ -23,7 +23,6 @@ const CampaignAnalysis: React.FC = () => {
       1.8, 3.2, 7.0, 4.0, 7.1, 8.3, 8.7, 7.7, 5.4, 3.5, 4.7, 1.7, 4.0, 7.1, 5.4,
       3.3,
     ],
-    Visits: [2, 4, 8, 5, 9, 11, 10, 8, 6, 4, 5, 3, 5, 9, 7, 5],
   };
 
   const options: ApexOptions = {

@@ -23,7 +23,7 @@ type MFTopBarType = {
   onToggle: () => void;
 };
 
-const enable: string[] = ["app/dashboard/install"];
+const enable: string[] = ["app/dashboard/install", "/TickrX/summary"];
 
 export function MFTopBar({ isExpanded, onToggle }: MFTopBarType) {
   const pathname = usePathname();
@@ -44,7 +44,7 @@ export function MFTopBar({ isExpanded, onToggle }: MFTopBarType) {
         {enable.includes(pathname) && (
           <>
             <PackageSelect />
-            <DashboardSelect />
+            {/* <DashboardSelect /> */}
             <MFDateRangePicker className="rounded-md border" />
           </>
         )}
@@ -111,17 +111,17 @@ function UserPopUp() {
 
 function PackageSelect() {
   const items = [
-    { title: "Test", value: "test" },
-    { title: "ITC", value: "ITC" },
-    { title: "demo package demo package", value: "demo" },
-    { title: "Test 1", value: "test1" },
-    { title: "ITC 1", value: "ITC1" },
-    { title: "demo package 1", value: "demo1" },
+    { title: "Select C-ID", value: "select" },
+    { title: "3001", value: "3001" },
+    { title: "3002", value: "3002" },
+    { title: "3003", value: "3003" },
+    { title: "3004", value: "3004" },
+    { title: "3005", value: "3005" },
   ];
   return (
     <MFSingleSelect
       items={items}
-      placeholder="Select Package"
+      placeholder="Select Creative Id"
       title="Package"
       className="max-w-40"
     />

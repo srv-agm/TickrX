@@ -51,12 +51,6 @@ const menu: MenuItem[] = [
     icon: <Globe size={18} />,
     subMenu: [
       {
-        title: "Dashboard",
-        icon: "",
-        subMenu: [],
-        route: "/TickrX/dashboard",
-      },
-      {
         title: "Summary",
         icon: "",
         subMenu: [],
