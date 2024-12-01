@@ -27,7 +27,7 @@ const BarGraph: React.FC<BarGraphProps> = ({ data = [] }) => {
   return (
     <div className="h-full flex flex-col">
       <h3 className="mb-4 text-lg font-bold">
-        Adoption Rate by Creative Guideline
+        Adoption Rate by Creative 
       </h3>
       <div className="overflow-y-auto flex-1">
         {data.map((item, index) => (
