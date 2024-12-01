@@ -70,7 +70,8 @@ const CampaignAnalysis: React.FC = () => {
   ];
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-md">
+    <>
+    {/* // <div className="rounded-lg bg-white p-4 shadow-md"> */}
       <h2 className="mb-4 text-xl font-bold">Campaign Analysis</h2>
       <div className="mb-4 flex space-x-2">
         {(Object.keys(graphData) as GraphKey[]).map((tab) => (
@@ -86,7 +87,8 @@ const CampaignAnalysis: React.FC = () => {
         ))}
       </div>
       <Chart options={options} series={series} type="line" height={300} />
-    </div>
+    {/* // </div> */}
+    </>
   );
 };
 

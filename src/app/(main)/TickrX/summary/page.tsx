@@ -26,7 +26,8 @@ const BarGraph: React.FC = () => {
   ];
 
   return (
-    <div className="rounded-lg bg-white p-4 shadow-md">
+    // <div className="rounded-lg bg-white p-4 shadow-md">
+    <>
       <h3 className="mb-4 text-lg font-bold">
         Adoption Rate by Creative Guideline
       </h3>
@@ -45,8 +46,9 @@ const BarGraph: React.FC = () => {
             </span>
           </div>
         ))}
+        {/* </div> */}
       </div>
-    </div>
+    </>
   );
 };
 
@@ -59,12 +61,12 @@ interface SummaryApiItem {
 // Add utility function to format numbers
 const formatLargeNumber = (value: string): string => {
   // Remove commas and convert to number
-  const num = parseFloat(value.replace(/,/g, ''));
-  
+  const num = parseFloat(value.replace(/,/g, ""));
+
   if (num >= 1e9) {
-    return (num / 1e9).toFixed(2) + 'B';
+    return (num / 1e9).toFixed(2) + "B";
   } else if (num >= 1e6) {
-    return (num / 1e6).toFixed(2) + 'M';
+    return (num / 1e6).toFixed(2) + "M";
   } else {
     return num.toLocaleString();
   }
@@ -87,40 +89,46 @@ const CardWithGraph: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
-        const response = await fetch('https://ticker_plus.mfilterit.net/Summary', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+
+        const response = await fetch(
+          "https://ticker_plus.mfilterit.net/Summary",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data: SummaryApiItem[] = await response.json();
-        
+
         if (!Array.isArray(data)) {
-          throw new Error('Invalid data format received from API');
+          throw new Error("Invalid data format received from API");
         }
 
         // Format the data
-        const formattedData = data.map(item => {
+        const formattedData = data.map((item) => {
           if (item.title === "Impressions" || item.title === "Clicks") {
             return {
               ...item,
-              value: formatLargeNumber(item.value)
+              value: formatLargeNumber(item.value),
             };
           }
           return item;
         });
 
         setCardData(formattedData);
-
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error instanceof Error ? error.message : 'An error occurred while fetching data');
+        console.error("Error fetching data:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while fetching data",
+        );
         setCardData([
           { title: "Creative Quality Score", value: "0%" },
           { title: "Impressions", value: "0" },
@@ -150,42 +158,51 @@ const CardWithGraph: React.FC = () => {
           <Card key={index} title={card.title} value={card.value} />
         ))}
       </div>
-      <div className="flex gap-4">
-        <div className="w-1/2">
-          <CampaignAnalysis />
-        </div>
-        <div className="w-1/2 rounded-lg bg-white p-4 shadow-md">
-          <div className="max-h-[400px] overflow-y-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="p-2 text-left text-sm font-semibold text-gray-600">Creative ID</th>
-                  <th className="p-2 text-left text-sm font-semibold text-gray-600">Impressions</th>
-                  <th className="p-2 text-left text-sm font-semibold text-gray-600">Clicks</th>
-                  <th className="p-2 text-left text-sm font-semibold text-gray-600">CTR</th>
-                  <th className="p-2 text-left text-sm font-semibold text-gray-600">Compliance Score</th>
+      <div className="mb-4 w-full rounded-lg bg-white p-4 shadow-md">
+        <div className="max-h-[400px] overflow-y-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="p-2 text-left text-sm font-semibold text-gray-600">
+                  Creative ID
+                </th>
+                <th className="p-2 text-left text-sm font-semibold text-gray-600">
+                  Impressions
+                </th>
+                <th className="p-2 text-left text-sm font-semibold text-gray-600">
+                  Clicks
+                </th>
+                <th className="p-2 text-left text-sm font-semibold text-gray-600">
+                  CTR
+                </th>
+                <th className="p-2 text-left text-sm font-semibold text-gray-600">
+                  Compliance Score
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {tableData.map((row, index) => (
+                <tr key={index} className="border-b">
+                  <td className="p-2 text-sm">{row.creativeId}</td>
+                  <td className="p-2 text-sm">{row.impressions}</td>
+                  <td className="p-2 text-sm">{row.clicks}</td>
+                  <td className="p-2 text-sm">{row.ctr}</td>
+                  <td className="p-2 text-sm">{row.complianceScore}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="p-2 text-sm">{row.creativeId}</td>
-                    <td className="p-2 text-sm">{row.impressions}</td>
-                    <td className="p-2 text-sm">{row.clicks}</td>
-                    <td className="p-2 text-sm">{row.ctr}</td>
-                    <td className="p-2 text-sm">{row.complianceScore}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-      <hr/>
-      <hr/>
-      <hr/>
-      <hr/>
-      <BarGraph />
+
+      <div className="flex gap-4">
+        <div className="h-[400px] flex-1 rounded-lg bg-white p-4 shadow-md">
+          <CampaignAnalysis />
+        </div>
+        <div className="h-[400px] flex-1 rounded-lg bg-white p-4 shadow-md">
+          <BarGraph />
+        </div>
+      </div>
     </div>
   );
 };
