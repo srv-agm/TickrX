@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import CampaignAnalysis from "../../component/linechart";
 interface CardProps {
   title: string;
@@ -50,106 +50,103 @@ const BarGraph: React.FC = () => {
   );
 };
 
-const CardWithGraph: React.FC = () => {
-  const cards = [
-    { title: "Creative Quality Score", value: "78.01%" },
-    { title: "Impressions", value: "8,719" },
-    { title: "Clicks", value: "64.05%" },
-    { title: "CTR %", value: "$4.89M" },
-  ];
+// Update interface to match actual API response
+interface SummaryApiItem {
+  title: string;
+  value: string;
+}
 
-  // Add table data
-  const tableData = [
-    {
-      creativeId: "CRV-001",
-      impressions: "2,345",
-      clicks: "125",
-      ctr: "5.33%",
-      complianceScore: "85%"
-    },
-    {
-      creativeId: "CRV-002",
-      impressions: "3,678",
-      clicks: "198",
-      ctr: "5.38%",
-      complianceScore: "92%"
-    },
-    {
-      creativeId: "CRV-003",
-      impressions: "1,987",
-      clicks: "87",
-      ctr: "4.38%",
-      complianceScore: "78%"
-    },
-    {
-      creativeId: "CRV-001",
-      impressions: "2,345",
-      clicks: "125",
-      ctr: "5.33%",
-      complianceScore: "85%"
-    },
-    {
-      creativeId: "CRV-002",
-      impressions: "3,678",
-      clicks: "198",
-      ctr: "5.38%",
-      complianceScore: "92%"
-    },
-    {
-      creativeId: "CRV-003",
-      impressions: "1,987",
-      clicks: "87",
-      ctr: "4.38%",
-      complianceScore: "78%"
-    },
-    {
-      creativeId: "CRV-001",
-      impressions: "2,345",
-      clicks: "125",
-      ctr: "5.33%",
-      complianceScore: "85%"
-    },
-    {
-      creativeId: "CRV-002",
-      impressions: "3,678",
-      clicks: "198",
-      ctr: "5.38%",
-      complianceScore: "92%"
-    },
-    {
-      creativeId: "CRV-003",
-      impressions: "1,987",
-      clicks: "87",
-      ctr: "4.38%",
-      complianceScore: "78%"
-    },
-    {
-      creativeId: "CRV-001",
-      impressions: "2,345",
-      clicks: "125",
-      ctr: "5.33%",
-      complianceScore: "85%"
-    },
-    {
-      creativeId: "CRV-002",
-      impressions: "3,678",
-      clicks: "198",
-      ctr: "5.38%",
-      complianceScore: "92%"
-    },
-    {
-      creativeId: "CRV-003",
-      impressions: "1,987",
-      clicks: "87",
-      ctr: "4.38%",
-      complianceScore: "78%"
-    },
-  ];
+// Add utility function to format numbers
+const formatLargeNumber = (value: string): string => {
+  // Remove commas and convert to number
+  const num = parseFloat(value.replace(/,/g, ''));
+  
+  if (num >= 1e9) {
+    return (num / 1e9).toFixed(2) + 'B';
+  } else if (num >= 1e6) {
+    return (num / 1e6).toFixed(2) + 'M';
+  } else {
+    return num.toLocaleString();
+  }
+};
+
+const CardWithGraph: React.FC = () => {
+  const [cardData, setCardData] = React.useState<SummaryApiItem[]>([
+    { title: "Creative Quality Score", value: "0%" },
+    { title: "Impressions", value: "0" },
+    { title: "Clicks", value: "0" },
+    { title: "CTR %", value: "0%" },
+  ]);
+
+  const [tableData, setTableData] = React.useState<any[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch('https://ticker_plus.mfilterit.net/Summary', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data: SummaryApiItem[] = await response.json();
+        
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format received from API');
+        }
+
+        // Format the data
+        const formattedData = data.map(item => {
+          if (item.title === "Impressions" || item.title === "Clicks") {
+            return {
+              ...item,
+              value: formatLargeNumber(item.value)
+            };
+          }
+          return item;
+        });
+
+        setCardData(formattedData);
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error instanceof Error ? error.message : 'An error occurred while fetching data');
+        setCardData([
+          { title: "Creative Quality Score", value: "0%" },
+          { title: "Impressions", value: "0" },
+          { title: "Clicks", value: "0" },
+          { title: "CTR %", value: "0%" },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return <div className="text-red-500">Error: {error}</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="bg-[#f6f0e4] p-4">
       <div className="mb-6 flex gap-[10px]">
-        {cards.map((card, index) => (
+        {cardData.map((card, index) => (
           <Card key={index} title={card.title} value={card.value} />
         ))}
       </div>
